@@ -13,8 +13,12 @@ def emotion_detector_route():
     result = emotion_detector(text_to_analyze)
 
     # Manejo seguro cuando la API falla
+
+    # -------------------------------
+    # Si la función devuelve None o dominant_emotion es None → entrada inválida
+
     if result is None or result.get("dominant_emotion") is None:
-        return "La API de emociones no está disponible en este momento."
+        return "¡Texto inválido! ¡Por favor, inténtalo de nuevo!"
 
     anger = result["anger"]
     disgust = result["disgust"]

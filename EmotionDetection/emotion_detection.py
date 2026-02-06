@@ -2,17 +2,21 @@ import requests
 import json
 
 def emotion_detector(text_to_analyze):
+
+    # URL del endpoint de la API
     url = "https://sn-watson-emotion.labs.skills.network/emotion"
-    headers = {"Content-Type": "application/json"}
+
+    # Payload que se envía a la API
     payload = {"text": text_to_analyze}
 
-    response = requests.post(url, json=payload, headers=headers)
+    # Llamada al servidor
+    response = requests.post(url, json=payload)
 
-    # Convertir respuesta JSON
-    response_dict = json.loads(response.text)
-
-    # Verificar si la API devolvió emociones
-    if "emotionPredictions" not in response_dict:
+    # -------------------------------
+    # MANEJO DE ERRORES (TAREA 7)
+    # -------------------------------
+    # Si el usuario envía texto vacío, la API devuelve status_code = 400
+    if response.status_code == 400:
         return {
             "anger": None,
             "disgust": None,
@@ -22,17 +26,32 @@ def emotion_detector(text_to_analyze):
             "dominant_emotion": None
         }
 
-    emotions = response_dict["emotionPredictions"][0]["emotion"]
+    # Si la API falla por otra razón
+    if response.status_code != 200:
+        return None
 
-    anger = emotions["anger"]
-    disgust = emotions["disgust"]
-    fear = emotions["fear"]
-    joy = emotions["joy"]
-    sadness = emotions["sadness"]
+    # Procesar respuesta válida
+    result = response.json()
 
-    # Emoción dominante
+    # Extraer emociones
+    anger = result["emotionPredictions"][0]["emotion"]["anger"]
+    disgust = result["emotionPredictions"][0]["emotion"]["disgust"]
+    fear = result["emotionPredictions"][0]["emotion"]["fear"]
+    joy = result["emotionPredictions"][0]["emotion"]["joy"]
+    sadness = result["emotionPredictions"][0]["emotion"]["sadness"]
+
+    # Determinar emoción dominante
+    emotions = {
+        "anger": anger,
+        "disgust": disgust,
+        "fear": fear,
+        "joy": joy,
+        "sadness": sadness
+    }
+
     dominant_emotion = max(emotions, key=emotions.get)
 
+    # Devolver diccionario final
     return {
         "anger": anger,
         "disgust": disgust,
